@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DEVFINISH | Neon Architects</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link href="https://api.fontshare.com/v2/css?f[]=clash-display@200,400,500,600,700&f[]=satoshi@300,400,500,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Satoshi', 'sans-serif'],
+                        display: ['Clash Display', 'sans-serif'],
+                    },
+                    colors: {
+                        'void': '#030303',
+                        'concrete': '#0a0a0a',
+                        'neon': '#D9FF00',
+                    },
+                    animation: {
+                        'spin-slow': 'spin 20s linear infinite',
+                        'pulse-glow': 'pulseGlow 4s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        pulseGlow: {
+                            '0%, 100%': { opacity: 0.4, transform: 'scale(1)' },
+                            '50%': { opacity: 0.8, transform: 'scale(1.1)' },
+                        }
+                    },
+                    boxShadow: {
+                        'neon': '0 0 20px rgba(217, 255, 0, 0.4), 0 0 40px rgba(217, 255, 0, 0.2)',
+                        'neon-strong': '0 0 30px rgba(217, 255, 0, 0.6), 0 0 60px rgba(217, 255, 0, 0.4)',
+                    },
+                    dropShadow: {
+                        'neon': '0 0 15px rgba(217, 255, 0, 0.8)',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* 1. FLUID GLOW CURSOR */
+        body { cursor: none; background-color: #030303; }
+        
+        /* The small sharp dot */
+        .cursor-dot {
+            position: fixed; top: 0; left: 0; width: 8px; height: 8px;
+            background: #D9FF00; borderRadius: 50%; z-index: 9999; pointer-events: none;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 20px #D9FF00;
+        }
+        /* The larger trailing circle */
+        .cursor-circle {
+            position: fixed; top: 0; left: 0; width: 40px; height: 40px;
+            border: 2px solid #D9FF00; borderRadius: 50%; z-index: 9998; pointer-events: none;
+            transform: translate(-50%, -50%); transition: width 0.2s, height 0.2s, background-color 0.2s;
+            mix-blend-mode: difference;
+        }
+        /* The giant ambient light behind the cursor */
+        .cursor-light {
+            position: fixed; top: 0; left: 0; width: 600px; height: 600px;
+            background: radial-gradient(circle, rgba(217,255,0,0.15) 0%, rgba(0,0,0,0) 60%);
+            borderRadius: 50%; z-index: 1; pointer-events: none;
+            transform: translate(-50%, -50%);
+            transition: all 0.1s ease-out;
+        }
+        body.hovering .cursor-circle { width: 80px; height: 80px; background: #D9FF00; box-shadow: 0 0 40px #D9FF00; }
+
+        /* 2. TEXT GLOW UTILITY */
+        .text-bloom {
+            text-shadow: 0 0 10px rgba(217,255,0,0.5), 0 0 20px rgba(217,255,0,0.3), 0 0 30px rgba(217,255,0,0.1);
+        }
+        .text-bloom-strong {
+            text-shadow: 0 0 10px #D9FF00, 0 0 30px rgba(217,255,0,0.8), 0 0 60px rgba(217,255,0,0.4);
+        }
+
+        /* 3. FILM GRAIN */
+        .grain {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 50; opacity: 0.07;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+
+        /* 4. CARD STACKING */
+        .stack-area { position: relative; }
+        .stack-card {
+            position: sticky; top: 100px; height: 500px; margin-bottom: 50px;
+            transform-origin: center top;
+            box-shadow: 0 -20px 60px rgba(0,0,0,0.8);
+            border: 1px solid rgba(217, 255, 0, 0.1);
+        }
+
+        /* 5. PRELOADER */
+        #preloader {
+            position: fixed; inset: 0; background: #030303; z-index: 10000;
+            display: flex; align-items: center; justify-content: center;
+            transition: transform 1s cubic-bezier(0.76, 0, 0.24, 1);
+        }
+        .outline-text { -webkit-text-stroke: 2px rgba(255,255,255,0.2); color: transparent; }
+    </style>
+</head>
+<body class="bg-void text-white overflow-x-hidden selection:bg-neon selection:text-black">
+
+    <div class="cursor-dot hidden md:block"></div>
+    <div class="cursor-circle hidden md:block"></div>
+    <div class="cursor-light hidden md:block"></div>
+    <div class="grain"></div>
+
+    <div id="preloader">
+        <div class="font-display font-bold text-6xl md:text-8xl flex gap-4 overflow-hidden">
+            <span class="translate-y-full animate-[slideUp_0.5s_forwards_0.2s] outline-text">DEV</span>
+            <span class="translate-y-full animate-[slideUp_0.5s_forwards_0.4s] text-neon text-bloom-strong">FINISH</span>
+        </div>
+    </div>
+    <style>@keyframes slideUp { to { transform: translateY(0); } }</style>
+
+    <nav class="fixed top-0 left-0 w-full p-6 z-40 flex justify-between items-center">
+        <a href="#" class="font-display font-bold text-2xl tracking-widest hover-trigger text-neon drop-shadow-neon">DF.</a>
+        <div class="hidden md:flex gap-12 font-sans text-xs font-bold uppercase tracking-widest">
+            <a href="#capabilities" class="hover-trigger hover:text-neon hover:text-bloom transition">Capabilities</a>
+            <a href="#contact" class="hover-trigger hover:text-neon hover:text-bloom transition">Contact</a>
+        </div>
+        <a href="#contact" class="hover-trigger border-2 border-neon text-neon px-8 py-2 rounded-full text-xs font-bold uppercase hover:bg-neon hover:text-black hover:shadow-neon-strong transition duration-300 shadow-neon">
+            Start Project
+        </a>
+    </nav>
+
+    <section class="min-h-screen flex flex-col justify-center px-6 relative overflow-hidden">
+        <div class="absolute -right-20 top-0 w-[500px] h-[500px] border-[30px] border-neon/10 rounded-full animate-spin-slow blur-[80px]"></div>
+        <div class="absolute -left-40 bottom-0 w-[600px] h-[600px] bg-neon/20 rounded-full blur-[150px] animate-pulse-glow"></div>
+        <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-neon/5 rounded-full blur-[200px] pointer-events-none"></div>
+
+        <div class="container mx-auto relative z-10 pt-20">
+            <div class="overflow-hidden">
+                <h1 class="font-display font-semibold text-[13vw] leading-[0.85] tracking-tight uppercase">
+                    We Finish <br>
+                    <span class="text-neon ml-[10vw] text-bloom-strong">Unfinished</span> <br>
+                    Code.
+                </h1>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-12 mt-20 gap-8 items-end">
+                <div class="md:col-span-4">
+                     <div class="w-full h-2 rounded-full bg-gradient-to-r from-neon via-neon/50 to-transparent blur-[2px] mb-4"></div>
+                     <p class="font-sans text-neon tracking-widest uppercase text-sm text-bloom">Backend Rescue Services</p>
+                </div>
+                <div class="md:col-span-8">
+                    <p class="font-sans text-xl md:text-2xl font-light leading-relaxed max-w-2xl text-gray-300 relative">
+                        <span class="absolute -left-4 top-0 h-full w-1 bg-neon shadow-neon"></span>
+                        &nbsp;&nbsp;Stop looking at a broken frontend. We take over abandoned repositories, audit the damage, build the secure backend infrastructure, and deploy.
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="absolute bottom-10 left-6 text-xs font-bold uppercase tracking-widest text-neon text-bloom animate-bounce">
+            ( Scroll Down )
+        </div>
+    </section>
+
+    <section id="capabilities" class="stack-area py-32 bg-concrete relative">
+        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[2px] bg-gradient-to-r from-transparent via-neon to-transparent shadow-neon"></div>
+
+        <div class="container mx-auto px-6 relative z-10">
+            <h2 class="font-display text-5xl mb-24 uppercase text-center"><span class="text-neon text-bloom">Methodology</span></h2>
+            
+            <div class="stack-card sticky top-32 bg-[#0a0a0a]/90 backdrop-blur-xl border border-neon/20 shadow-neon rounded-3xl p-8 md:p-16 flex flex-col md:flex-row gap-16 group transition-transform hover:-translate-y-4">
+                <div class="md:w-1/3">
+                    <div class="font-display text-9xl text-transparent group-hover:text-neon transition-colors duration-500 text-bloom-strong" style="-webkit-text-stroke: 2px #D9FF00;">01</div>
+                </div>
+                <div class="md:w-2/3 flex flex-col justify-between">
+                    <div>
+                        <h3 class="font-display text-4xl mb-6 text-white group-hover:text-neon transition-colors">The Forensic Audit</h3>
+                        <p class="text-gray-400 text-lg leading-relaxed">
+                            We identify security vulnerabilities, hardcoded secrets, and spaghetti logic. We deliver a report on exactly what needs to be fixed.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stack-card sticky top-40 bg-[#0f0f0f]/90 backdrop-blur-xl border border-neon/20 shadow-neon rounded-3xl p-8 md:p-16 flex flex-col md:flex-row gap-16 group transition-transform hover:-translate-y-4">
+                 <div class="md:w-1/3">
+                    <div class="font-display text-9xl text-transparent group-hover:text-neon transition-colors duration-500 text-bloom-strong" style="-webkit-text-stroke: 2px #D9FF00;">02</div>
+                </div>
+                <div class="md:w-2/3 flex flex-col justify-between">
+                    <div>
+                        <h3 class="font-display text-4xl mb-6 text-white group-hover:text-neon transition-colors">Backend Injection</h3>
+                        <p class="text-gray-400 text-lg leading-relaxed">
+                             We write the API routes, connect the database (Postgres/Mongo), and set up the authentication headers so your buttons actually work.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stack-card sticky top-48 bg-[#141414]/90 backdrop-blur-xl border border-neon/20 shadow-neon rounded-3xl p-8 md:p-16 flex flex-col md:flex-row gap-16 group transition-transform hover:-translate-y-4">
+                 <div class="md:w-1/3">
+                    <div class="font-display text-9xl text-transparent group-hover:text-neon transition-colors duration-500 text-bloom-strong" style="-webkit-text-stroke: 2px #D9FF00;">03</div>
+                </div>
+                <div class="md:w-2/3 flex flex-col justify-between">
+                    <div>
+                        <h3 class="font-display text-4xl mb-6 text-white group-hover:text-neon transition-colors">Launch Protocol</h3>
+                        <p class="text-gray-400 text-lg leading-relaxed">
+                            We handle the Vercel/AWS deployment, configure the environment variables, set up the SSL, and hand over the keys.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="py-16 overflow-hidden bg-void relative border-y border-neon/30 shadow-neon">
+        <div class="absolute inset-0 bg-neon/5 blur-xl pointer-events-none"></div>
+        <div class="flex whitespace-nowrap animate-[marquee_20s_linear_infinite]">
+            <span class="text-7xl font-display font-bold uppercase mr-24 text-neon text-bloom">React • Node • NextJS • Postgres • Stripe •</span>
+            <span class="text-7xl font-display font-bold uppercase mr-24 text-neon text-bloom">React • Node • NextJS • Postgres • Stripe •</span>
+        </div>
+    </div>
+    <style>@keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }</style>
+
+    <footer id="contact" class="min-h-screen bg-void text-white px-6 pt-32 pb-10 flex flex-col justify-between relative overflow-hidden">
+        <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-neon/20 rounded-full blur-[200px] pointer-events-none"></div>
+
+        <div class="relative z-10">
+            <h2 class="font-display text-[10vw] leading-[0.8] uppercase tracking-tighter mb-10">
+                Let's Get<br><span class="text-neon text-bloom-strong">Technical.</span>
+            </h2>
+            <div class="max-w-xl">
+                 <a href="mailto:hello@devfinish.com" class="hover-trigger inline-block border-4 border-neon px-12 py-6 rounded-full font-display font-bold uppercase text-2xl hover:bg-neon hover:text-black transition duration-300 shadow-neon hover:shadow-neon-strong">
+                    hello@devfinish.com
+                </a>
+            </div>
+        </div>
+
+        <div class="relative z-10 grid grid-cols-2 md:grid-cols-4 border-t border-neon/30 pt-8 gap-8 font-sans font-bold text-sm uppercase tracking-widest">
+            <div>
+                <p class="text-neon mb-4 text-bloom">Socials</p>
+                <ul class="space-y-2 text-gray-400">
+                    <li><a href="#" class="hover:text-neon">Github</a></li>
+                    <li><a href="#" class="hover:text-neon">Twitter / X</a></li>
+                </ul>
+            </div>
+            <div class="col-span-2 text-right md:text-right">
+                <p class="text-neon mb-4 text-bloom">DevFinish © 2026</p>
+                <p class="text-gray-400">San Francisco, CA</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        window.addEventListener('load', () => {
+            setTimeout(() => { document.getElementById('preloader').style.transform = 'translateY(-100%)'; }, 800);
+        });
+
+        const dot = document.querySelector('.cursor-dot');
+        const circle = document.querySelector('.cursor-circle');
+        const light = document.querySelector('.cursor-light');
+        const hoverTriggers = document.querySelectorAll('.hover-trigger');
+
+        document.addEventListener('mousemove', (e) => {
+            dot.style.left = e.clientX + 'px'; dot.style.top = e.clientY + 'px';
+            setTimeout(() => {
+                circle.style.left = e.clientX + 'px'; circle.style.top = e.clientY + 'px';
+                light.style.left = e.clientX + 'px'; light.style.top = e.clientY + 'px';
+            }, 50);
+        });
+
+        hoverTriggers.forEach(trigger => {
+            trigger.addEventListener('mouseenter', () => document.body.classList.add('hovering'));
+            trigger.addEventListener('mouseleave', () => document.body.classList.remove('hovering'));
+        });
+    </script>
+</body>
+</html>
